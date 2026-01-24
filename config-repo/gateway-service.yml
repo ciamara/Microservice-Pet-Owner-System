@@ -1,0 +1,18 @@
+spring:
+  cloud:
+    gateway:
+      routes:
+        - id: owner-pets-route
+          uri: lb://PETS-SERVICE
+          predicates:
+            - Path=/api/owners/*/pets/**
+
+        - id: owners-route
+          uri: lb://OWNERS-SERVICE
+          predicates:
+            - Path=/api/owners/**
+
+        - id: pets-route
+          uri: lb://PETS-SERVICE
+          predicates:
+            - Path=/api/pets/**

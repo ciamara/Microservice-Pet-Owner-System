@@ -1,0 +1,5 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://db-owners:5432/owners_db
+    username: user
+    password: password

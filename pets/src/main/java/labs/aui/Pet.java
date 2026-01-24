@@ -36,6 +36,7 @@ public class Pet implements Comparable<Pet>, Serializable {
     private UUID petId;
     @Column(name = "name")
     private String name;
+    @Enumerated(EnumType.STRING)
     @Column(name = "animal")
     private Animal animal;
     @Column(name = "date_of_birth")
@@ -46,6 +47,7 @@ public class Pet implements Comparable<Pet>, Serializable {
     private String breed;
     @Column(name = "color")
     private String color;
+    @Enumerated(EnumType.STRING)
     @Column(name = "gender")
     private Gender gender;
     @ManyToOne(fetch = FetchType.EAGER)

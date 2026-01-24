@@ -27,6 +27,7 @@ public class CategoryEventController {
 
     @PostMapping
     public ResponseEntity<Void> createSimpleOwner(@RequestBody SimpleOwner simpleOwner) {
+        System.out.println("Received sync event for owner: " + simpleOwner.getSimpleOwnerId());
         simpleOwnerService.createSimpleOwner(simpleOwner);
         return ResponseEntity.ok().build();
     }

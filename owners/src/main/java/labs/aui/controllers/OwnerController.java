@@ -27,8 +27,7 @@ public class OwnerController {
     @Autowired
     private RestTemplate restTemplate;
 
-    //@Value("http://localhost:8082/api/events")
-    @Value("http://pets-service:8082/api/events")
+    @Value("http://PETS-SERVICE/api/events")
     private String eventsUrl;
 
     @Autowired

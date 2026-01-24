@@ -1,4 +1,27 @@
 services:
+  discovery-service:
+    build: ./discovery-server
+    ports:
+      - "8761:8761"
+    networks:
+      - aui-network
+
+  config-service:
+    build: ./config-server
+    ports:
+      - "8888:8888"
+    environment:
+      - SPRING_PROFILES_ACTIVE=native
+    volumes:
+      - ./config-repo:/config
+    networks:
+      - aui-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8888/owners-service/default"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
   # --- Databases ---
   db-owners:
     image: postgres:15-alpine
@@ -6,6 +29,8 @@ services:
       POSTGRES_DB: owners_db
       POSTGRES_USER: user
       POSTGRES_PASSWORD: password
+    networks:
+      - aui-network
 
   db-pets:
     image: postgres:15-alpine
@@ -13,46 +38,94 @@ services:
       POSTGRES_DB: pets_db
       POSTGRES_USER: user
       POSTGRES_PASSWORD: password
+    networks:
+      - aui-network
 
   # --- Microservices ---
   owners-service:
     build: ./owners
     environment:
-      - SPRING_DATASOURCE_URL=jdbc:postgresql://db-owners:5432/owners_db
-      - SPRING_DATASOURCE_USERNAME=user
-      - SPRING_DATASOURCE_PASSWORD=password
-      - SERVER_PORT=8081
+      - SPRING_APPLICATION_NAME=owners-service
+      - SPRING_CLOUD_CONFIG_FAIL_FAST=true
+      - SPRING_CONFIG_IMPORT=optional:configserver:http://config-service:8888
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://discovery-service:8761/eureka/
+      - SPRING_CLOUD_DISCOVERY_INSTANCE_ID=owners-1
     depends_on:
-      - db-owners
+      config-service:
+        condition: service_healthy
+      discovery-service:
+        condition: service_started
+      db-owners:
+        condition: service_started
+    networks:
+      - aui-network
 
-  pets-service:
+  pets-service-1:
     build: ./pets
     environment:
-      - SPRING_DATASOURCE_URL=jdbc:postgresql://db-pets:5432/pets_db
-      - SPRING_DATASOURCE_USERNAME=user
-      - SPRING_DATASOURCE_PASSWORD=password
-      - SERVER_PORT=8082
+      - SPRING_APPLICATION_NAME=pets-service
+      - SPRING_CLOUD_CONFIG_FAIL_FAST=true
+      - SPRING_CONFIG_IMPORT=optional:configserver:http://config-service:8888
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://discovery-service:8761/eureka/
+      - SPRING_CLOUD_DISCOVERY_INSTANCE_ID=pets-1
     depends_on:
-      - db-pets
+      config-service:
+        condition: service_healthy
+      discovery-service:
+        condition: service_started
+      db-pets:
+        condition: service_started
+    networks:
+      - aui-network
+
+  pets-service-2:
+    build: ./pets
+    environment:
+      - SPRING_APPLICATION_NAME=pets-service
+      - SPRING_CLOUD_CONFIG_FAIL_FAST=true
+      - SPRING_CONFIG_IMPORT=optional:configserver:http://config-service:8888
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://discovery-service:8761/eureka/
+      - SPRING_CLOUD_DISCOVERY_INSTANCE_ID=pets-2
+    depends_on:
+      config-service:
+        condition: service_healthy
+      discovery-service:
+        condition: service_started
+      db-pets:
+        condition: service_started
+    networks:
+      - aui-network
 
   gateway-service:
     build: ./GatewayApplication
     ports:
       - "8080:8080"
     environment:
-      - CATEGORIES_SERVICE_URL=http://owners-service:8081
-      - ELEMENTS_SERVICE_URL=http://pets-service:8082
+    - SPRING_APPLICATION_NAME=gateway-service
+    - SPRING_CONFIG_IMPORT=configserver:http://config-service:8888
+    - EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE=http://discovery-service:8761/eureka/
+    - EUREKA_CLIENT_FETCH_REGISTRY=true
+    - EUREKA_CLIENT_REGISTER_WITH_EUREKA=true
     depends_on:
-      - owners-service
-      - pets-service
+      config-service:
+        condition: service_healthy
+      discovery-service:
+        condition: service_started
+    networks:
+      - aui-network
 
-  # --- Angular Frontend ---
+  # --- Frontend ---
   frontend:
     build: ./lab5
     ports:
       - "4200:80"
     environment:
-      - PORT=80
       - GATEWAY_URL=http://gateway-service:8080/
     depends_on:
       - gateway-service
+    networks:
+      - aui-network
+
+networks:
+  aui-network:
+    driver: bridge

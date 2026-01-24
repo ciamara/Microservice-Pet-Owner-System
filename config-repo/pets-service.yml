@@ -1,0 +1,5 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://db-pets:5432/pets_db
+    username: user
+    password: password
