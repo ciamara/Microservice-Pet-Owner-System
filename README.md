@@ -13,5 +13,5 @@ simple pet-owner system in java
 ## Pets        
 -> project managing pet entities and requests directed at pets, with simple owner implementation to maintain link between entities (one to many)     
 
-## lab5        
+##  Angular       
 -> angular project with view representation of the owner pet system, this uses the gateway and microservices projects pets and owners   
