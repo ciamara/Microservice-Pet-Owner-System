@@ -116,7 +116,7 @@ services:
 
   # --- Frontend ---
   frontend:
-    build: ./lab5
+    build: ./angular-frontend
     ports:
       - "4200:80"
     environment:

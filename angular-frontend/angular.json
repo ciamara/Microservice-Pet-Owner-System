@@ -7,7 +7,7 @@
   },
   "newProjectRoot": "projects",
   "projects": {
-    "lab5": {
+    "angular-frontend": {
       "projectType": "application",
       "schematics": {},
       "root": "",
@@ -57,10 +57,10 @@
           "builder": "@angular/build:dev-server",
           "configurations": {
             "production": {
-              "buildTarget": "lab5:build:production"
+              "buildTarget": "angular-frontend:build:production"
             },
             "development": {
-              "buildTarget": "lab5:build:development"
+              "buildTarget": "angular-frontend:build:development"
             }
           },
           "defaultConfiguration": "development"
